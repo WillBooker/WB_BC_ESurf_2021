@@ -5,3 +5,5 @@ Data provided allows for the production of figures found in the corresponding pa
 Data size precludes provision of all sources used in the paper, but reasonable requests for access will be accomodated.
 
 The primary function of this code is to demonstrate the methodology used to calculate a throughput ratio, and its spatial variant.
+
+[![DOI](https://zenodo.org/badge/381521911.svg)](https://zenodo.org/badge/latestdoi/381521911)
