@@ -6,9 +6,26 @@
 ## raw data used to derive products are available upon request.
 
 require(magicaxis)
+require(raster)
 
+## dir = 
 
-dir = 'C:/Users/willt/Documents/phd_work/papers/methods'
+ex_dod = raster(paste0(dir, '/ex_dod.tif'))
+ex_mat = as.matrix(ex_dod)
+
+res = 0.001
+p = 0.46
+
+na.sum = sum(is.na(values(ex_dod)))
+not.na = ncell(ex_dod) - na.sum
+area = not.na*(res*res)
+width = not.na/ncol(ex_dod)*res
+
+m = sum(abs(ex_mat), na.rm =T) * res * res * (1-p)  / width
+sed_out = read.csv(paste0(dir, '/fix_sed.csv'), header = T)
+qb = sed_out[1,2]
+
+ratio = qb/m
 
 ##Figure 4
 
