@@ -6,36 +6,25 @@
 ## raw data used to derive products are available upon request.
 
 require(magicaxis)
-require(raster)
 
-## dir = 
-
-ex_dod = raster(paste0(dir, '/ex_dod.tif'))
-ex_mat = as.matrix(ex_dod)
-
-res = 0.001
-p = 0.46
-
-na.sum = sum(is.na(values(ex_dod)))
-not.na = ncell(ex_dod) - na.sum
-area = not.na*(res*res)
-width = not.na/ncol(ex_dod)*res
-
-m = sum(abs(ex_mat), na.rm =T) * res * res * (1-p)  / width
-sed_out = read.csv(paste0(dir, '/fix_sed.csv'), header = T)
-qb = sed_out[1,2]
-
-ratio = qb/m
+##specify location of files downloaded with code
+dir = ''
 
 ##Figure 4
 
 f_sed_out = read.csv(paste0(dir, '/fix_sed.csv'), header = T)
 m_sed_out = read.csv(paste0(dir, '/mob_sed.csv'), header = T)
 
+f_sed_err = read.csv(paste0(dir, '/fix_sed_err.csv'), header = T)
+m_sed_err = read.csv(paste0(dir, '/mob_sed_err.csv'), header = T)
 
 plot(f_sed_out[,1], f_sed_out[,2], type = 'o',
      axes = F, ann = F, col = 'red', ylim = c(0, 0.0015), xlim = c(0,960), pch = 0, cex = 0.8, log = '', lwd =1.5)
 points(m_sed_out[,1], m_sed_out[,2], type = 'o',col = 'blue', pch = 0, cex = 0.8, lwd =1.5)
+polygon(c(f_sed_out[,1],rev(f_sed_out[,1])),c(f_sed_out[,2]+f_sed_err[,1], rev(f_sed_out[,2]-f_sed_err[,1])),
+        col =alpha('red', 0.5), border = F,lwd=1.5)
+polygon(c(m_sed_out[,1],rev(m_sed_out[,1])),c(m_sed_out[,2]+m_sed_err[,1], rev(m_sed_out[,2]-m_sed_err[,1])),
+        col =alpha('blue', 0.5), border = F,lwd=1.5)
 legend('topright', col = c('red','blue'),
        legend = c('Fixed', 'Mobile'),
        pch = c(0,0), bty = 'n',lty = c(rep(1,2)), lwd =1.5)
@@ -48,10 +37,17 @@ magaxis(frame.plot = T,  xlab = 'Time (min)', ylab = expression(paste(q[b], ' ( 
 f_dem_out = read.csv(paste0(dir, '/fix_dem.csv'), header = T)
 m_dem_out = read.csv(paste0(dir, '/mob_dem.csv'), header = T)
 
+f_dem_err = read.csv(paste0(dir, '/fix_dem_err.csv'), header = T)
+m_dem_err = read.csv(paste0(dir, '/mob_dem_err.csv'), header = T)
+
 #delta v
 plot(f_dem_out[,1], f_dem_out[,3], type = 'o',
      axes = F, ann = F, col = 'red', ylim = c(-0.0008, 0.0001), xlim = c(0,960), pch = 0, cex = 0.8, log = '', lwd =1.5)
-points(cumsum(m_dem_out[,1]), m_dem_out[,3], type = 'o',col = 'blue', pch = 0, cex = 0.8, lwd =1.5)
+points((m_dem_out[,1]), m_dem_out[,3], type = 'o',col = 'blue', pch = 0, cex = 0.8, lwd =1.5)
+polygon(c(f_dem_out[,1],rev(f_dem_out[,1])),c(f_dem_out[,3]*(1-f_dem_err[,1]), rev(f_dem_out[,3]*(1+f_dem_err[,1]))),
+        col =alpha('red', 0.5), border = F,lwd=1.5)
+polygon(c(m_dem_out[,1],rev(m_dem_out[,1])),c(m_dem_out[,3]*(1-m_dem_err[,1]), rev(m_dem_out[,3]*(1+m_dem_err[,1]))),
+        col =alpha('blue', 0.5), border = F,lwd=1.5)
 legend('bottomright', col = c('red','blue'),
        legend = c('Fixed','Mobile'),
        pch = c(0,0), bty = 'n',lty = c(rep(1,2)), lwd =1.5)
@@ -60,6 +56,10 @@ magaxis(frame.plot = T,  xlab = 'Time (min)', ylab = expression(paste(Delta,'v',
 plot(f_dem_out[,1], f_dem_out[,4], type = 'o',
      axes = F, ann = F, col = 'red', ylim = c(0, 0.003), xlim = c(0,960), pch = 0, cex = 0.8, log = '', lwd =1.5)
 points(m_dem_out[,1], m_dem_out[,4], type = 'o',col = 'blue', pch = 0, cex = 0.8, lwd =1.5)
+polygon(c(f_dem_out[,1],rev(f_dem_out[,1])),c(f_dem_out[,4]*(1-f_dem_err[,1]), rev(f_dem_out[,4]*(1+f_dem_err[,1]))),
+        col =alpha('red', 0.5), border = F,lwd=1.5)
+polygon(c(m_dem_out[,1],rev(m_dem_out[,1])),c(m_dem_out[,4]*(1-m_dem_err[,1]), rev(m_dem_out[,4]*(1+m_dem_err[,1]))),
+        col =alpha('blue', 0.5), border = F,lwd=1.5)
 legend('topright', col = c('red','blue'),
        legend = c('Fixed','Mobile'),
        pch = c(0,0), bty = 'n',lty = c(rep(1,2)), lwd =1.5)
@@ -73,8 +73,12 @@ f_zeta = f_dem_out[,2]/f_dem_out[,4]
 m_zeta = m_dem_out[,2]/m_dem_out[,4]
 
 plot(f_dem_out[,1], f_zeta, type='o', col = 'red',
-     axes = F, ann = F, ylim = c(0, 10), xlim = c(0,960), pch = 0, cex = 0.8, log = '', lwd =1.5)
+     axes = F, ann = F, ylim = c(0.025, 10), xlim = c(0,960), pch = 0, cex = 0.8, log = 'y', lwd =1.5)
 points(m_dem_out[,1], m_zeta, type='o', col = 'blue', pch = 0, cex = 0.8, lwd =1.5)
+polygon(c(f_dem_out[,1],rev(f_dem_out[,1])),c(f_zeta-f_dem_err[,2], rev(f_zeta+f_dem_err[,2])),
+        col =alpha('red', 0.5), border = F,lwd=1.5)
+polygon(c(m_dem_out[,1],rev(m_dem_out[,1])),c(m_zeta-m_dem_err[,2], rev(m_zeta+m_dem_err[,2])),
+        col =alpha('blue', 0.5), border = F,lwd=1.5)
 legend('topleft', col = c('red','blue'),
        legend = c('Fixed','Mobile'),
        pch = c(0,0), bty = 'n',lty = c( rep(1,2)), lwd =1.5)
